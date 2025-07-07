@@ -111,6 +111,27 @@
 
       let finalTranscript = '';
 
+      // Correcties voor specifieke namen
+      const naamCorrecties = {
+        'mustafa': 'Mustafë',
+        'Mustafa': 'Mustafë',
+        'Altien': 'Altin',
+        'Al tien': 'Altin',
+        'Bessnik': 'Besnik',
+        'Zijrafete': 'Zyrafete',
+        'Batsie kem': 'Baci Kem',
+        'Ard tie': 'Ardti'
+        // voeg hier extra fuzzy varianten toe
+      };
+
+      function corrigeerNamen(tekst) {
+        for (let fout in naamCorrecties) {
+          const regex = new RegExp("\\b" + fout + "\\b", "gi");
+          tekst = tekst.replace(regex, naamCorrecties[fout]);
+        }
+        return tekst;
+      }
+
       recognition.addEventListener('result', e => {
         let interimTranscript = '';
         for (let i = e.resultIndex; i < e.results.length; i++) {
@@ -120,12 +141,13 @@
             interimTranscript += e.results[i][0].transcript;
           }
         }
-        output.innerText = finalTranscript + interimTranscript;
+        let corrigeerdeText = corrigeerNamen(finalTranscript + interimTranscript);
+        output.innerText = corrigeerdeText;
       });
 
       recognition.addEventListener('end', () => {
         if (isListening) {
-          recognition.start(); // Herstart automatisch
+          recognition.start();
         }
       });
     }
