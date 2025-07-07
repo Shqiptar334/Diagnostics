@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Doa-diagnostics Spraak naar tekst</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background: #f5f7fa;
+      color: #333;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    header {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 40px;
+      background: #ffffff;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    header h1 {
+      font-size: 24px;
+      color: #2c3e50;
+      margin: 0;
+    }
+
+    header img {
+      height: 50px;
+    }
+
+    main {
+      max-width: 800px;
+      width: 90%;
+      margin-top: 50px;
+      text-align: center;
+    }
+
+    .transcript {
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 30px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      font-size: 20px;
+      min-height: 100px;
+    }
+
+    button {
+      margin-top: 30px;
+      background: #3498db;
+      color: white;
+      border: none;
+      padding: 15px 30px;
+      font-size: 18px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    button:hover {
+      background: #2980b9;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Doa-diagnostics</h1>
+    <img src="IMG_1971.png" alt="Logo">
+  </header>
+
+  <main>
+    <div class="transcript" id="output">
+      Klik op de knop en begin te spreken...
+    </div>
+    <button id="start">Start spraak naar tekst</button>
+  </main>
+
+  <script>
+    window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    if (!window.SpeechRecognition) {
+      document.getElementById('output').innerText = "Sorry, jouw browser ondersteunt geen spraakherkenning.";
+    } else {
+      const recognition = new SpeechRecognition();
+      recognition.lang = 'nl-NL';
+      recognition.interimResults = true;
+      recognition.continuous = true;
+
+      const output = document.getElementById('output');
+      const startBtn = document.getElementById('start');
+
+      let isListening = false;
+
+      startBtn.addEventListener('click', () => {
+        if (!isListening) {
+          recognition.start();
+          startBtn.textContent = "Stop spraak naar tekst";
+          isListening = true;
+        } else {
+          recognition.stop();
+          startBtn.textContent = "Start spraak naar tekst";
+          isListening = false;
+        }
+      });
+
+      let finalTranscript = '';
+
+      recognition.addEventListener('result', e => {
+        let interimTranscript = '';
+        for (let i = e.resultIndex; i < e.results.length; i++) {
+          if (e.results[i].isFinal) {
+            finalTranscript += e.results[i][0].transcript;
+          } else {
+            interimTranscript += e.results[i][0].transcript;
+          }
+        }
+        output.innerText = finalTranscript + interimTranscript;
+      });
+
+      recognition.addEventListener('end', () => {
+        if (isListening) {
+          recognition.start(); // Herstart automatisch
+        }
+      });
+    }
+  </script>
+</body>
+</html>
